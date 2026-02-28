@@ -1,72 +1,99 @@
-"use client";
-import axios from "axios";
-import Link from "next/link";
-import React, { useState } from "react";
-import { useRouter } from "next/navigation";
+'use client';
+
+import axios from 'axios';
+import Link from 'next/link';
+import React, {useState} from 'react';
+import {useRouter} from 'next/navigation';
 
 const Login = () => {
   const [user, setUser] = useState({
-    email: "",
-    password: "",
+    email: '',
+    password: ''
   });
+
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
   const router = useRouter();
-  const onsubmit = async () => {
+
+  const onSubmit = async () => {
     try {
       setIsLoading(true);
-      const res = await axios.post("/api/users/login", user);
-      console.log(res);
-      router.push("/profile");
-    } catch (error) {
-      console.log("something went wrong.");
+      setError('');
+      const res = await axios.post('/api/users/login', user);
+      router.push('/profile');
+    } catch (err: any) {
+      setError(err.response?.data?.error || 'Login failed');
     } finally {
       setIsLoading(false);
     }
   };
+
   return (
-    <>
-      {isLoading ? (
-        <div className="text-center animate-pulse mt-48">Loading...</div>
-      ) : (
-        <div className="text-2xl text-center w-fit m-auto text-blue-100 mt-10 border-1 border-gray-300 rounded-md p-2">
-          Login
-          <div className="flex gap-2 text-center items-center mt-2 justify-center">
-            <label htmlFor="email" className="text-gray-300 w-[30%]">
-              Email :{" "}
-            </label>
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-600 to-indigo-700 px-4">
+      <div className="bg-white shadow-2xl rounded-2xl w-full max-w-md p-8">
+        <h1 className="text-3xl font-bold text-center text-gray-800 mb-6">
+          Welcome Back 👋
+        </h1>
+
+        {error && (
+          <div className="bg-red-100 text-red-600 p-2 rounded-md mb-4 text-sm text-center">
+            {error}
+          </div>
+        )}
+
+        <div className="space-y-4">
+          <div>
+            <label className="text-gray-600 text-sm">Email</label>
             <input
               type="email"
-              className="border-2 border-gray-300 rounded-md p-2"
-              placeholder="Email"
-              onChange={(e) => setUser({ ...user, email: e.target.value })}
+              placeholder="Enter your email"
+              className="w-full mt-1 p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
+              onChange={(e) => setUser({...user, email: e.target.value})}
             />
           </div>
-          <div className="flex gap-2 text-center items-center mt-2 justify-center">
-            <label htmlFor="password" className="text-gray-300 w-[30%]">
-              Password :{" "}
-            </label>
+
+          <div>
+            <label className="text-gray-600 text-sm">Password</label>
             <input
               type="password"
-              className="border-2 border-gray-300 rounded-md p-2"
-              placeholder="Password"
-              onChange={(e) => setUser({ ...user, password: e.target.value })}
+              placeholder="Enter your password"
+              className="w-full mt-1 p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
+              onChange={(e) => setUser({...user, password: e.target.value})}
             />
           </div>
-          <button
-            type="submit"
-            className="bg-blue-500 mt-4 text-white rounded-md p-2"
-            onClick={onsubmit}
-          >
-            Login
-          </button>
-          <div>
-            <Link href="/signup" className="text-blue-100">
-              SignUp here
-            </Link>
-          </div>
         </div>
-      )}
-    </>
+
+        <button
+          onClick={onSubmit}
+          disabled={isLoading}
+          className={`w-full mt-6 p-3 rounded-lg text-white font-semibold transition duration-300 ${
+            isLoading
+              ? 'bg-gray-400 cursor-not-allowed'
+              : 'bg-blue-600 hover:bg-blue-700 active:scale-95'
+          }`}
+        >
+          {isLoading ? 'Logging in...' : 'Login'}
+        </button>
+
+        <p className="text-center text-gray-600 text-sm mt-6">
+          Don't have an account?{' '}
+          <Link
+            href="/signup"
+            className="text-blue-600 font-medium hover:underline"
+          >
+            Sign up
+          </Link>
+        </p>
+        <div className="text-right mt-2">
+          <Link
+            href="/forgot-password"
+            className="text-sm text-blue-600 hover:underline"
+          >
+            Forgot Password?
+          </Link>
+        </div>
+      </div>
+    </div>
   );
 };
 

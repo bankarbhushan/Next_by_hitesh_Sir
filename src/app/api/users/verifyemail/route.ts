@@ -8,7 +8,8 @@ export async function POST(request: NextRequest) {
     const reqBody = await request.json();
     const {token} = reqBody;
 
-    const user: any = User.findOne({
+    console.log("token",token);
+    const user: any = await User.findOne({
       verifyToken: token,
       verifyTokenExpiry: {$gt: Date.now()}
     });
@@ -23,10 +24,15 @@ export async function POST(request: NextRequest) {
         }
       );
     }
-    user.isVerified = true;
+    user.isverified = true;
     user.verifyToken = undefined;
     user.verifyTokenExpiry = undefined;
     await user.save();
+
+    return NextResponse.json({
+      message: 'Email verified successfully.',
+      success: true
+    });
   } catch (error: any) {
     return NextResponse.json(
       {

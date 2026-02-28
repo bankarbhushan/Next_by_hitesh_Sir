@@ -1,14 +1,22 @@
 import React from "react";
 
-const UserProfile = async ({ params }: any) => {
-  const user = await params;
+interface UserProfileProps {
+  params: {
+    id: string;
+  };
+}
+
+const UserProfile = ({ params }: UserProfileProps) => {
   return (
-    <div>
-      <h1 className="text-2xl text-center mt-5">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-orange-500 to-red-600">
+      <h1 className="text-2xl md:text-3xl text-center text-white">
         Hey{" "}
-        <span className="p-2 rounded-md bg-orange-400 mt-5 ">{user.id}</span>
+        <span className="p-3 rounded-lg bg-white text-orange-600 font-bold shadow-md">
+          {params.id}
+        </span>
       </h1>
     </div>
   );
 };
+
 export default UserProfile;

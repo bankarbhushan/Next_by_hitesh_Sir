@@ -1,30 +1,37 @@
 import { NextRequest, NextResponse } from "next/server";
 
-export default function middlewere(request:NextRequest){
-    const path = request.nextUrl.pathname;
-    const ispublicPath =  path === "/login" || path === "/signup";
+export default function middleware(request: NextRequest) {
+  const path = request.nextUrl.pathname;
 
-    const token = request.cookies.get("token");
+  const isPublicPath =
+    path === "/login" ||
+    path === "/signup" ||
+    path === "/verifyemail" || 
+    path === "/forgotpassword"||
+    path === "resetpassword" ;
 
-    // if i have the public url and also the token that means i have logged in.
-    // i can't be access the login page again.
-    if(ispublicPath && token){
-        return NextResponse.redirect(new URL('/',request.nextUrl));
-    }
+  const token = request.cookies.get("token")?.value;
 
-    // the the path is not public that means the excuding the /login and /signup so i can't be access the 
-    // profile page and other not public path.
-    if(!ispublicPath && !token){
-        return NextResponse.redirect(new URL('/login',request.nextUrl))
-    }
+  // If user is logged in and tries to access public page
+  if (isPublicPath && token) {
+    return NextResponse.redirect(new URL("/profile", request.url));
+  }
 
+  // If user is not logged in and tries to access protected page
+  if (!isPublicPath && !token) {
+    return NextResponse.redirect(new URL("/login", request.url));
+  }
+
+  return NextResponse.next();
 }
 
 export const config = {
-    matcher :[
-        '/',
-        '/login', 
-        '/logout',
-        '/profile'
-    ]
-}
+  matcher: [
+    "/profile/:path*",
+    "/login",
+    "/signup",
+    "/verifyemail",
+    "/forgotpassword",
+    "/resetpassword"
+  ],
+};
