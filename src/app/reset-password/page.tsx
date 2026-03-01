@@ -1,22 +1,22 @@
-'use client';
+"use client";
 
-import {useSearchParams} from 'next/navigation';
-import {useState} from 'react';
-import axios from 'axios';
+import { useSearchParams } from "next/navigation";
+import { useState, Suspense } from "react";
+import axios from "axios";
 
-export default function ResetPassword() {
+function ResetPasswordForm() {
   const searchParams = useSearchParams();
-  const token = searchParams.get('token');
+  const token = searchParams.get("token");
 
-  const [newPassword, setNewPassword] = useState('');
-  const [message, setMessage] = useState('');
+  const [newPassword, setNewPassword] = useState("");
+  const [message, setMessage] = useState("");
   const [isError, setIsError] = useState(false);
   const [loading, setLoading] = useState(false);
 
   const handleResetPassword = async () => {
     if (!newPassword) {
       setIsError(true);
-      setMessage('Password is required');
+      setMessage("Password is required");
       return;
     }
 
@@ -24,15 +24,15 @@ export default function ResetPassword() {
       setLoading(true);
       setIsError(false);
 
-      const res = await axios.post('/api/users/resetpassword', {
+      const res = await axios.post("/api/users/resetpassword", {
         token,
-        newPassword
+        newPassword,
       });
 
       setMessage(res.data.message);
     } catch (error: any) {
       setIsError(true);
-      setMessage(error.response?.data?.message || 'Something went wrong');
+      setMessage(error.response?.data?.message || "Something went wrong");
     } finally {
       setLoading(false);
     }
@@ -40,7 +40,6 @@ export default function ResetPassword() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#0f0c29] via-[#1a1a40] to-[#0f2027] px-4">
-      {/* Glass Card */}
       <div
         className="relative w-full max-w-md p-8 rounded-3xl 
                       bg-white/5 backdrop-blur-xl 
@@ -48,10 +47,9 @@ export default function ResetPassword() {
                       shadow-[0_0_40px_rgba(139,92,246,0.4)]"
       >
         <h2 className="text-3xl font-bold text-center text-white mb-6 tracking-wide">
-           Reset Password
+          🔐 Reset Password
         </h2>
 
-        {/* Input */}
         <input
           type="password"
           placeholder="Enter new password"
@@ -66,7 +64,6 @@ export default function ResetPassword() {
                      transition-all duration-300"
         />
 
-        {/* Button */}
         <button
           onClick={handleResetPassword}
           disabled={loading}
@@ -74,18 +71,17 @@ export default function ResetPassword() {
                      transition-all duration-300
                      ${
                        loading
-                         ? 'bg-purple-400/50 cursor-not-allowed'
-                         : 'bg-gradient-to-r from-purple-500 to-cyan-500 hover:scale-105 hover:shadow-[0_0_20px_rgba(168,85,247,0.8)]'
+                         ? "bg-purple-400/50 cursor-not-allowed"
+                         : "bg-gradient-to-r from-purple-500 to-cyan-500 hover:scale-105 hover:shadow-[0_0_20px_rgba(168,85,247,0.8)]"
                      }`}
         >
-          {loading ? 'Resetting...' : 'Reset Password'}
+          {loading ? "Resetting..." : "Reset Password"}
         </button>
 
-        {/* Message */}
         {message && (
           <p
             className={`mt-5 text-center text-sm font-medium ${
-              isError ? 'text-red-400' : 'text-emerald-400'
+              isError ? "text-red-400" : "text-emerald-400"
             }`}
           >
             {message}
@@ -93,5 +89,19 @@ export default function ResetPassword() {
         )}
       </div>
     </div>
+  );
+}
+
+export default function ResetPassword() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#0f0c29] via-[#1a1a40] to-[#0f2027]">
+          <div className="text-white text-xl">Loading...</div>
+        </div>
+      }
+    >
+      <ResetPasswordForm />
+    </Suspense>
   );
 }
