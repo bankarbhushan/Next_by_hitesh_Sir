@@ -12,13 +12,14 @@ export const sendEmail = async ({
   userId: string;
 }) => {
   try {
+    // Generate token
     const hashedToken = await bcryptjs.hash(userId.toString(), 10);
 
-    //  Save token based on type
+    // Save token in DB
     if (emailType === 'RESET') {
       await User.findByIdAndUpdate(userId, {
         forgotPasswordToken: hashedToken,
-        forgotPasswordTokenExpiry: Date.now() + 3600000 // 1 hour
+        forgotPasswordTokenExpiry: Date.now() + 3600000
       });
     } else {
       await User.findByIdAndUpdate(userId, {
@@ -27,6 +28,7 @@ export const sendEmail = async ({
       });
     }
 
+    // Create transporter
     const transport = nodemailer.createTransport({
       host: 'sandbox.smtp.mailtrap.io',
       port: 2525,
@@ -36,27 +38,22 @@ export const sendEmail = async ({
       }
     });
 
-    // Correct redirect URL
+    // Create link
     const link =
       emailType === 'VERIFY'
         ? `${process.env.DOMAIN}/verifyemail?token=${hashedToken}`
         : `${process.env.DOMAIN}/reset-password?token=${hashedToken}`;
 
-    const mailOptions = {
+    // Send email
+    const mailResponse = await transport.sendMail({
       from: 'no-reply@yourapp.com',
       to: email,
       subject:
-        emailType === 'VERIFY'
-          ? 'Verify Your Email'
-          : 'Reset Your Password',
+        emailType === 'VERIFY' ? 'Verify Your Email' : 'Reset Your Password',
       html: `
         <p>
-          Click 
-          <a href="${link}">here</a>
-          to ${
-            emailType === 'VERIFY'
-              ? 'verify your email'
-              : 'reset your password'
+          Click <a href="${link}">here</a> to ${
+            emailType === 'VERIFY' ? 'verify your email' : 'reset your password'
           }.
           <br /><br />
           Or copy this link:
@@ -64,11 +61,9 @@ export const sendEmail = async ({
           ${link}
         </p>
       `
-    };
+    });
 
-    const mailResponse = await transport.sendMail(mailOptions);
     return mailResponse;
-
   } catch (error: unknown) {
     if (error instanceof Error) {
       throw new Error(error.message);
